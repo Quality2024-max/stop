@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Countdown Timer App</title>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Poppins', sans-serif;
+    }
+
+    body{
+      background:#0f172a;
+      color:white;
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+    }
+
+    .container{
+      width:100%;
+      max-width:420px;
+      background:#111827;
+      border-radius:25px;
+      padding:35px;
+      text-align:center;
+      box-shadow:0 15px 40px rgba(0,0,0,0.4);
+    }
+
+    h1{
+      margin-bottom:25px;
+      font-size:32px;
+      font-weight:700;
+    }
+
+    /* TIMER AREA */
+    .timer-wrapper{
+      position:relative;
+      width:260px;
+      height:260px;
+      margin:0 auto 30px;
+    }
+
+    svg{
+      width:260px;
+      height:260px;
+      transform:rotate(-90deg);
+    }
+
+    circle{
+      fill:none;
+      stroke-width:12;
+      stroke-linecap:round;
+    }
+
+    /* Background circle */
+    .bg{
+      stroke:#1e293b;
+    }
+
+    /* Progress circle */
+    .progress{
+      stroke:#38bdf8;
+      stroke-dasharray:754;
+      stroke-dashoffset:0;
+      transition:stroke-dashoffset 1s linear;
+    }
+
+    /* Timer text */
+    .timer-display{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      font-size:48px;
+      font-weight:700;
+      letter-spacing:2px;
+    }
+
+    /* INPUTS */
+    .inputs{
+      display:flex;
+      justify-content:center;
+      gap:15px;
+      margin-bottom:25px;
+    }
+
+    .inputs input{
+      width:110px;
+      padding:12px;
+      border:none;
+      border-radius:12px;
+      background:#1e293b;
+      color:white;
+      text-align:center;
+      font-size:18px;
+      outline:none;
+    }
+
+    .inputs input::placeholder{
+      color:#94a3b8;
+    }
+
+    /* BUTTON AREA */
+    .buttons{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      padding:12px 22px;
+      border:none;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:16px;
+      font-weight:600;
+      transition:0.3s;
+      color:white;
+    }
+
+    .start{
+      background:#22c55e;
+    }
+
+    .pause{
+      background:#f59e0b;
+    }
+
+    .stop{
+      background:#8b5cf6;
+    }
+
+    .reset{
+      background:#ef4444;
+    }
+
+    button:hover{
+      transform:translateY(-2px);
+      opacity:0.9;
+    }
+
+    /* MOBILE RESPONSIVE */
+    @media(max-width:480px){
+
+      .timer-wrapper{
+        width:220px;
+        height:220px;
+      }
+
+      svg{
+        width:220px;
+        height:220px;
+      }
+
+      .timer-display{
+        font-size:40px;
+      }
+
+      .inputs{
+        flex-direction:column;
+        align-items:center;
+      }
+
+      .inputs input{
+        width:100%;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>Countdown Timer</h1>
+
+    <!-- TIMER CIRCLE -->
+    <div class="timer-wrapper">
+
+      <svg>
+
+        <!-- Background Circle -->
+        <circle class="bg" cx="130" cy="130" r="120"></circle>
+
+        <!-- Animated Progress Circle -->
+        <circle class="progress" cx="130" cy="130" r="120"></circle>
+
+      </svg>
+
+      <!-- TIMER DISPLAY -->
+      <div class="timer-display" id="timer">
+        00:00
+      </div>
+
+    </div>
+
+    <!-- INPUTS -->
+    <div class="inputs">
+
+      <input
+        type="number"
+        id="minutes"
+        placeholder="Minutes"
+        min="0"
+      >
+
+      <input
+        type="number"
+        id="seconds"
+        placeholder="Seconds"
+        min="0"
+        max="59"
+      >
+
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="buttons">
+
+      <button class="start" onclick="startTimer()">
+        Start
+      </button>
+
+      <button class="pause" onclick="pauseTimer()">
+        Pause
+      </button>
+
+      <button class="stop" onclick="stopTimer()">
+        Stop
+      </button>
+
+      <button class="reset" onclick="resetTimer()">
+        Reset
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- ALARM SOUND -->
+  <audio id="alarmSound">
+    <source
+      src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
+      type="audio/ogg"
+    >
+  </audio>
+
+  <script>
+
+    // ====================================
+    // VARIABLES
+    // ====================================
+
+    let timer;
+
+    let totalTime = 0;
+
+    let remainingTime = 0;
+
+    let isRunning = false;
+
+    // Progress Circle
+    const circle = document.querySelector(".progress");
+
+    const radius = 120;
+
+    const circumference = 2 * Math.PI * radius;
+
+    circle.style.strokeDasharray = circumference;
+
+    // ====================================
+    // FORMAT TIME
+    // Convert seconds to MM:SS
+    // ====================================
+
+    function formatTime(time){
+
+      let minutes = Math.floor(time / 60);
+
+      let seconds = time % 60;
+
+      return (
+        String(minutes).padStart(2, '0') +
+        ":" +
+        String(seconds).padStart(2, '0')
+      );
+    }
+
+    // ====================================
+    // UPDATE TIMER DISPLAY
+    // ====================================
+
+    function updateDisplay(){
+
+      document.getElementById("timer").innerText =
+        formatTime(remainingTime);
+
+      // Update progress circle
+      let progress =
+        circumference -
+        (remainingTime / totalTime) * circumference;
+
+      circle.style.strokeDashoffset = progress;
+    }
+
+    // ====================================
+    // START TIMER
+    // ====================================
+
+    function startTimer(){
+
+      // Prevent multiple timers
+      if(isRunning){
+        return;
+      }
+
+      // Get input values
+      const mins =
+        parseInt(document.getElementById("minutes").value) || 0;
+
+      const secs =
+        parseInt(document.getElementById("seconds").value) || 0;
+
+      // First start
+      if(remainingTime === 0){
+
+        totalTime = (mins * 60) + secs;
+
+        remainingTime = totalTime;
+      }
+
+      // Validate time
+      if(totalTime <= 0){
+
+        alert("Please enter valid time");
+
+        return;
+      }
+
+      isRunning = true;
+
+      // Start countdown
+      timer = setInterval(() => {
+
+        if(remainingTime > 0){
+
+          remainingTime--;
+
+          updateDisplay();
+
+        } else {
+
+          // Stop timer
+          clearInterval(timer);
+
+          isRunning = false;
+
+          // Play alarm
+          document.getElementById("alarmSound").play();
+
+          // Show alert
+          alert("Time's Up!");
+        }
+
+      }, 1000);
+    }
+
+    // ====================================
+    // PAUSE TIMER
+    // ====================================
+
+    function pauseTimer(){
+
+      clearInterval(timer);
+
+      isRunning = false;
+    }
+
+    // ====================================
+    // STOP TIMER
+    // Completely stop and reset display
+    // ====================================
+
+    function stopTimer(){
+
+      clearInterval(timer);
+
+      isRunning = false;
+
+      totalTime = 0;
+
+      remainingTime = 0;
+
+      // Reset display
+      document.getElementById("timer").innerText = "00:00";
+
+      // Reset progress circle
+      circle.style.strokeDashoffset = 0;
+    }
+
+    // ====================================
+    // RESET TIMER
+    // ====================================
+
+    function resetTimer(){
+
+      clearInterval(timer);
+
+      isRunning = false;
+
+      totalTime = 0;
+
+      remainingTime = 0;
+
+      // Clear input fields
+      document.getElementById("minutes").value = "";
+
+      document.getElementById("seconds").value = "";
+
+      // Reset timer text
+      document.getElementById("timer").innerText = "00:00";
+
+      // Reset progress
+      circle.style.strokeDashoffset = 0;
+    }
+
+  </script>
+
+</body>
+</html>
