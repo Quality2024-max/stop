@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Countdown Timer App</title>
+  <title>Mobile Responsive Timer</title>
 
   <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,110 +26,111 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      padding:20px;
+      padding:15px;
     }
 
     .container{
       width:100%;
-      max-width:420px;
+      max-width:400px;
       background:#111827;
       border-radius:25px;
-      padding:35px;
+      padding:20px;
       text-align:center;
-      box-shadow:0 15px 40px rgba(0,0,0,0.4);
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
     }
 
     h1{
-      margin-bottom:25px;
-      font-size:32px;
-      font-weight:700;
+      margin-bottom:20px;
+      font-size:28px;
     }
 
-    /* TIMER AREA */
+    /* =========================
+       RESPONSIVE TIMER
+    ========================= */
+
     .timer-wrapper{
       position:relative;
-      width:260px;
-      height:260px;
-      margin:0 auto 30px;
+
+      width:70vw;
+      height:70vw;
+
+      max-width:260px;
+      max-height:260px;
+
+      margin:auto;
     }
 
     svg{
-      width:260px;
-      height:260px;
+      width:100%;
+      height:100%;
       transform:rotate(-90deg);
     }
 
     circle{
       fill:none;
-      stroke-width:12;
+      stroke-width:10;
       stroke-linecap:round;
     }
 
-    /* Background circle */
     .bg{
       stroke:#1e293b;
     }
 
-    /* Progress circle */
     .progress{
       stroke:#38bdf8;
       stroke-dasharray:754;
       stroke-dashoffset:0;
-      transition:stroke-dashoffset 1s linear;
+      transition:1s linear;
     }
 
-    /* Timer text */
     .timer-display{
       position:absolute;
       top:50%;
       left:50%;
       transform:translate(-50%, -50%);
-      font-size:48px;
+
+      font-size:clamp(28px, 8vw, 52px);
       font-weight:700;
-      letter-spacing:2px;
     }
 
     /* INPUTS */
+
     .inputs{
+      margin-top:25px;
       display:flex;
-      justify-content:center;
-      gap:15px;
-      margin-bottom:25px;
+      gap:10px;
     }
 
     .inputs input{
-      width:110px;
-      padding:12px;
+      flex:1;
+      padding:14px;
       border:none;
       border-radius:12px;
       background:#1e293b;
       color:white;
       text-align:center;
-      font-size:18px;
+      font-size:16px;
       outline:none;
     }
 
-    .inputs input::placeholder{
-      color:#94a3b8;
-    }
+    /* BUTTONS */
 
-    /* BUTTON AREA */
     .buttons{
-      display:flex;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
+      margin-top:20px;
+
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
     }
 
     button{
-      padding:12px 22px;
       border:none;
+      padding:14px;
       border-radius:12px;
-      cursor:pointer;
       font-size:16px;
       font-weight:600;
-      transition:0.3s;
       color:white;
+      cursor:pointer;
     }
 
     .start{
@@ -148,35 +149,29 @@
       background:#ef4444;
     }
 
-    button:hover{
-      transform:translateY(-2px);
-      opacity:0.9;
-    }
+    /* MOBILE FIX */
 
-    /* MOBILE RESPONSIVE */
     @media(max-width:480px){
 
-      .timer-wrapper{
-        width:220px;
-        height:220px;
-      }
-
-      svg{
-        width:220px;
-        height:220px;
-      }
-
-      .timer-display{
-        font-size:40px;
+      .container{
+        padding:15px;
       }
 
       .inputs{
         flex-direction:column;
-        align-items:center;
       }
 
-      .inputs input{
+      .buttons{
+        grid-template-columns:1fr;
+      }
+
+      button{
         width:100%;
+      }
+
+      .timer-wrapper{
+        width:75vw;
+        height:75vw;
       }
     }
 
@@ -189,20 +184,30 @@
 
     <h1>Countdown Timer</h1>
 
-    <!-- TIMER CIRCLE -->
+    <!-- TIMER -->
     <div class="timer-wrapper">
 
-      <svg>
+      <svg viewBox="0 0 300 300">
 
-        <!-- Background Circle -->
-        <circle class="bg" cx="130" cy="130" r="120"></circle>
+        <!-- Background -->
+        <circle
+          class="bg"
+          cx="150"
+          cy="150"
+          r="120">
+        </circle>
 
-        <!-- Animated Progress Circle -->
-        <circle class="progress" cx="130" cy="130" r="120"></circle>
+        <!-- Progress -->
+        <circle
+          class="progress"
+          cx="150"
+          cy="150"
+          r="120">
+        </circle>
 
       </svg>
 
-      <!-- TIMER DISPLAY -->
+      <!-- Timer Text -->
       <div class="timer-display" id="timer">
         00:00
       </div>
@@ -215,17 +220,12 @@
       <input
         type="number"
         id="minutes"
-        placeholder="Minutes"
-        min="0"
-      >
+        placeholder="Minutes">
 
       <input
         type="number"
         id="seconds"
-        placeholder="Seconds"
-        min="0"
-        max="59"
-      >
+        placeholder="Seconds">
 
     </div>
 
@@ -252,19 +252,14 @@
 
   </div>
 
-  <!-- ALARM SOUND -->
+  <!-- Alarm -->
   <audio id="alarmSound">
     <source
       src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
-      type="audio/ogg"
-    >
+      type="audio/ogg">
   </audio>
 
   <script>
-
-    // ====================================
-    // VARIABLES
-    // ====================================
 
     let timer;
 
@@ -274,7 +269,7 @@
 
     let isRunning = false;
 
-    // Progress Circle
+    // Circle Setup
     const circle = document.querySelector(".progress");
 
     const radius = 120;
@@ -283,11 +278,7 @@
 
     circle.style.strokeDasharray = circumference;
 
-    // ====================================
-    // FORMAT TIME
-    // Convert seconds to MM:SS
-    // ====================================
-
+    // FORMAT MM:SS
     function formatTime(time){
 
       let minutes = Math.floor(time / 60);
@@ -295,22 +286,18 @@
       let seconds = time % 60;
 
       return (
-        String(minutes).padStart(2, '0') +
-        ":" +
-        String(seconds).padStart(2, '0')
+        String(minutes).padStart(2,'0')
+        + ":" +
+        String(seconds).padStart(2,'0')
       );
     }
 
-    // ====================================
-    // UPDATE TIMER DISPLAY
-    // ====================================
-
+    // UPDATE DISPLAY
     function updateDisplay(){
 
       document.getElementById("timer").innerText =
         formatTime(remainingTime);
 
-      // Update progress circle
       let progress =
         circumference -
         (remainingTime / totalTime) * circumference;
@@ -318,25 +305,19 @@
       circle.style.strokeDashoffset = progress;
     }
 
-    // ====================================
-    // START TIMER
-    // ====================================
-
+    // START
     function startTimer(){
 
-      // Prevent multiple timers
       if(isRunning){
         return;
       }
 
-      // Get input values
       const mins =
         parseInt(document.getElementById("minutes").value) || 0;
 
       const secs =
         parseInt(document.getElementById("seconds").value) || 0;
 
-      // First start
       if(remainingTime === 0){
 
         totalTime = (mins * 60) + secs;
@@ -344,17 +325,15 @@
         remainingTime = totalTime;
       }
 
-      // Validate time
       if(totalTime <= 0){
 
-        alert("Please enter valid time");
+        alert("Enter valid time");
 
         return;
       }
 
       isRunning = true;
 
-      // Start countdown
       timer = setInterval(() => {
 
         if(remainingTime > 0){
@@ -365,25 +344,21 @@
 
         } else {
 
-          // Stop timer
           clearInterval(timer);
 
           isRunning = false;
 
-          // Play alarm
-          document.getElementById("alarmSound").play();
+          document
+            .getElementById("alarmSound")
+            .play();
 
-          // Show alert
           alert("Time's Up!");
         }
 
-      }, 1000);
+      },1000);
     }
 
-    // ====================================
-    // PAUSE TIMER
-    // ====================================
-
+    // PAUSE
     function pauseTimer(){
 
       clearInterval(timer);
@@ -391,11 +366,7 @@
       isRunning = false;
     }
 
-    // ====================================
-    // STOP TIMER
-    // Completely stop and reset display
-    // ====================================
-
+    // STOP
     function stopTimer(){
 
       clearInterval(timer);
@@ -406,17 +377,13 @@
 
       remainingTime = 0;
 
-      // Reset display
-      document.getElementById("timer").innerText = "00:00";
+      document.getElementById("timer")
+        .innerText = "00:00";
 
-      // Reset progress circle
       circle.style.strokeDashoffset = 0;
     }
 
-    // ====================================
-    // RESET TIMER
-    // ====================================
-
+    // RESET
     function resetTimer(){
 
       clearInterval(timer);
@@ -427,15 +394,13 @@
 
       remainingTime = 0;
 
-      // Clear input fields
       document.getElementById("minutes").value = "";
 
       document.getElementById("seconds").value = "";
 
-      // Reset timer text
-      document.getElementById("timer").innerText = "00:00";
+      document.getElementById("timer")
+        .innerText = "00:00";
 
-      // Reset progress
       circle.style.strokeDashoffset = 0;
     }
 
