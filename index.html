@@ -1,520 +1,526 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faculty Timekeeper</title>
 
-  <title>Faculty Countdown Timer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Google Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#141f19;
+    --panel:#1c2b23;
+    --inset:#0c1611;
+    --cream:#f3ead7;
+    --muted:#8fa392;
+    --brass:#cd9f46;
+    --brass-bright:#eec36c;
+    --brass-dim:#6b5a2e;
+    --alert:#c1443c;
+    --alert-bright:#e3665d;
+    --sage:#4f7d5c;
+    --sage-bright:#63986f;
+    --ring-track:#28382f;
+    --radius-panel: 10px;
+    --radius-el: 6px;
+  }
 
-  <style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:'Poppins', sans-serif;
-    }
+  body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:24px;
+    font-family:'Inter', sans-serif;
+    color:var(--cream);
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(205,159,70,0.08), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+      var(--bg);
+  }
 
-    body{
-      background:#0f172a;
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:15px;
-      color:white;
-    }
+  .plaque{
+    position:relative;
+    width:100%;
+    max-width:440px;
+    background:var(--panel);
+    border:1px solid rgba(205,159,70,0.25);
+    border-radius:var(--radius-panel);
+    padding:34px 28px 26px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.03);
+    transition:box-shadow .6s ease;
+  }
 
-    .container{
-      width:100%;
-      max-width:420px;
-      background:#111827;
-      border-radius:25px;
-      padding:20px;
-      text-align:center;
-      box-shadow:0 10px 35px rgba(0,0,0,0.4);
-    }
+  .plaque.urgent{
+    box-shadow:0 24px 60px rgba(193,68,60,0.25), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
 
-    h1{
-      font-size:30px;
-      margin-bottom:20px;
-      font-weight:700;
-    }
+  /* brass corner brackets — signature detail */
+  .corner{ position:absolute; width:18px; height:18px; border:2px solid var(--brass); opacity:0.8; }
+  .corner.tl{ top:8px; left:8px; border-right:none; border-bottom:none; }
+  .corner.tr{ top:8px; right:8px; border-left:none; border-bottom:none; }
+  .corner.bl{ bottom:8px; left:8px; border-right:none; border-top:none; }
+  .corner.br{ bottom:8px; right:8px; border-left:none; border-top:none; }
 
-    /* ======================
-       TIMER CIRCLE
-    ====================== */
+  .fullscreen-btn{
+    position:absolute;
+    top:18px;
+    right:18px;
+    background:none;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    padding:6px;
+    line-height:0;
+    border-radius:4px;
+  }
+  .fullscreen-btn:hover{ color:var(--brass-bright); }
 
-    .timer-wrapper{
-      position:relative;
+  .eyebrow{
+    text-align:center;
+    font-size:11px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--brass);
+    font-weight:600;
+  }
 
-      width:70vw;
-      height:70vw;
+  h1{
+    text-align:center;
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(24px,5vw,30px);
+    margin-top:4px;
+    margin-bottom:18px;
+    letter-spacing:0.01em;
+  }
 
-      max-width:260px;
-      max-height:260px;
+  .session-label-wrap{
+    text-align:center;
+    margin-bottom:22px;
+  }
 
-      margin:auto;
-    }
+  #sessionLabel{
+    width:100%;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--brass-dim);
+    color:var(--cream);
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:16px;
+    text-align:center;
+    padding:6px 4px;
+    outline:none;
+  }
+  #sessionLabel::placeholder{ color:var(--muted); opacity:0.8; }
+  #sessionLabel:focus{ border-bottom-color:var(--brass-bright); }
 
-    svg{
-      width:100%;
-      height:100%;
-      transform:rotate(-90deg);
-    }
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
 
-    circle{
-      fill:none;
-      stroke-width:10;
-      stroke-linecap:round;
-    }
+  /* ===== DIAL ===== */
+  .dial-wrap{
+    position:relative;
+    width:74vw; height:74vw;
+    max-width:250px; max-height:250px;
+    margin:0 auto 22px;
+  }
 
-    .bg{
-      stroke:#1e293b;
-    }
+  svg{ width:100%; height:100%; overflow:visible; }
+  .rotor{ transform:rotate(-90deg); transform-origin:150px 150px; }
 
-    .progress{
-      stroke:#38bdf8;
-      stroke-dasharray:754;
-      stroke-dashoffset:0;
-      transition:1s linear;
-    }
+  .tick{ stroke:var(--brass-dim); stroke-width:1.5; }
+  .tick.major{ stroke:var(--brass); stroke-width:2.5; }
 
-    .timer-display{
-      position:absolute;
-      top:50%;
-      left:50%;
-      transform:translate(-50%, -50%);
+  .track{ fill:none; stroke:var(--ring-track); stroke-width:9; }
+  .progress{
+    fill:none;
+    stroke:var(--brass-bright);
+    stroke-width:9;
+    stroke-linecap:round;
+    transition:stroke-dashoffset 1s linear, stroke .4s ease;
+  }
+  .progress.urgent{ stroke:var(--alert-bright); }
 
-      font-size:clamp(30px, 8vw, 52px);
-      font-weight:700;
-    }
+  .inset-plate{ fill:var(--inset); stroke:rgba(205,159,70,0.18); stroke-width:1; }
 
-    /* ======================
-       INPUTS
-    ====================== */
+  .timer-display{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-family:'Space Mono', monospace;
+    font-weight:700;
+    font-size:clamp(28px,7.5vw,44px);
+    color:var(--brass-bright);
+    letter-spacing:0.02em;
+    text-shadow:0 0 18px rgba(238,195,108,0.25);
+  }
+  .timer-display.urgent{ color:var(--alert-bright); text-shadow:0 0 18px rgba(227,102,93,0.3); }
 
-    .inputs{
-      margin-top:25px;
-      display:flex;
-      gap:10px;
-    }
+  @keyframes pulse{
+    0%,100%{ opacity:1; } 50%{ opacity:0.55; }
+  }
+  .timer-display.urgent.running{ animation:pulse 1s ease-in-out infinite; }
 
-    .inputs input{
-      flex:1;
-      padding:14px;
-      border:none;
-      border-radius:12px;
-      background:#1e293b;
-      color:white;
-      text-align:center;
-      font-size:16px;
-      outline:none;
-    }
+  /* ===== INPUTS ===== */
+  .inputs{ display:flex; gap:10px; margin-bottom:16px; }
+  .field{ flex:1; }
+  .field label{
+    display:block; font-size:10px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:6px; text-align:center;
+  }
+  .field input{
+    width:100%; padding:12px; border-radius:var(--radius-el);
+    border:1px solid rgba(205,159,70,0.2);
+    background:var(--inset); color:var(--cream);
+    text-align:center; font-family:'Space Mono', monospace; font-size:16px;
+    outline:none;
+  }
+  .field input:focus{ border-color:var(--brass); }
+  .field input::-webkit-outer-spin-button,
+  .field input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
 
-    .inputs input::placeholder{
-      color:#94a3b8;
-    }
+  /* ===== PRESETS ===== */
+  .presets{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:22px;
+  }
+  .chip{
+    background:transparent; border:1px solid var(--brass-dim); color:var(--muted);
+    font-family:'Inter',sans-serif; font-size:12px; font-weight:500;
+    padding:7px 12px; border-radius:4px; cursor:pointer; transition:.2s;
+  }
+  .chip:hover{ border-color:var(--brass); color:var(--brass-bright); }
 
-    /* ======================
-       BUTTONS
-    ====================== */
+  /* ===== BUTTONS ===== */
+  .buttons{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
-    .buttons{
-      margin-top:20px;
+  button{ font-family:'Inter',sans-serif; }
 
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:10px;
-    }
+  .btn{
+    padding:14px; border-radius:var(--radius-el); font-size:14px; font-weight:600;
+    letter-spacing:0.03em; text-transform:uppercase; cursor:pointer; border:1px solid transparent;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn:focus-visible{ outline:2px solid var(--brass-bright); outline-offset:2px; }
 
-    button{
-      border:none;
-      padding:14px;
-      border-radius:12px;
-      font-size:16px;
-      font-weight:600;
-      color:white;
-      cursor:pointer;
-      transition:0.3s;
-    }
+  .btn-start{ background:var(--brass-bright); color:#20170a; grid-column:1 / -1; }
+  .btn-start:hover{ background:var(--brass); }
 
-    button:hover{
-      transform:scale(1.03);
-    }
+  .btn-pause{ background:transparent; color:var(--cream); border-color:rgba(255,255,255,0.15); }
+  .btn-pause:hover{ border-color:var(--cream); }
 
-    .start{
-      background:#22c55e;
-    }
+  .btn-silence{ background:transparent; color:var(--alert-bright); border-color:var(--alert); opacity:0.55; }
+  .btn-silence.ringing{ opacity:1; background:rgba(193,68,60,0.12); }
 
-    .pause{
-      background:#f59e0b;
-    }
+  .btn-reset{ background:transparent; color:var(--muted); grid-column:1 / -1; padding:10px; }
+  .btn-reset:hover{ color:var(--cream); text-decoration:underline; }
 
-    .stop{
-      background:#8b5cf6;
-    }
+  .hint{
+    text-align:center; margin-top:16px; font-size:11px; color:var(--muted);
+    letter-spacing:0.04em;
+  }
+  .hint kbd{
+    font-family:'Space Mono',monospace; background:var(--inset); padding:1px 5px;
+    border-radius:3px; border:1px solid rgba(255,255,255,0.08);
+  }
 
-    .reset{
-      background:#ef4444;
-    }
+  @media (prefers-reduced-motion: reduce){
+    .progress{ transition:none; }
+    .timer-display.urgent.running{ animation:none; }
+  }
 
-    /* ======================
-       MOBILE RESPONSIVE
-    ====================== */
-
-    @media(max-width:480px){
-
-      .container{
-        padding:15px;
-      }
-
-      .inputs{
-        flex-direction:column;
-      }
-
-      .buttons{
-        grid-template-columns:1fr;
-      }
-
-      .timer-wrapper{
-        width:75vw;
-        height:75vw;
-      }
-
-      button{
-        width:100%;
-      }
-    }
-
-  </style>
+  @media (max-width:420px){
+    .plaque{ padding:26px 18px 20px; }
+    .dial-wrap{ width:78vw; height:78vw; }
+  }
+</style>
 </head>
-
 <body>
 
-  <div class="container">
+<div class="plaque" id="plaque">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
 
-    <h1>Faculty Timer</h1>
+  <button class="fullscreen-btn" id="fsBtn" title="Toggle fullscreen" aria-label="Toggle fullscreen">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>
+    </svg>
+  </button>
 
-    <!-- TIMER -->
-    <div class="timer-wrapper">
+  <p class="eyebrow">Faculty Timekeeper</p>
+  <h1>Keep the room on time</h1>
 
-      <svg viewBox="0 0 300 300">
-
-        <!-- Background Circle -->
-        <circle
-          class="bg"
-          cx="150"
-          cy="150"
-          r="120">
-        </circle>
-
-        <!-- Progress Circle -->
-        <circle
-          class="progress"
-          cx="150"
-          cy="150"
-          r="120">
-        </circle>
-
-      </svg>
-
-      <!-- TIMER TEXT -->
-      <div
-        class="timer-display"
-        id="timer">
-
-        00:00
-
-      </div>
-
-    </div>
-
-    <!-- INPUTS -->
-    <div class="inputs">
-
-      <input
-        type="number"
-        id="minutes"
-        placeholder="Minutes">
-
-      <input
-        type="number"
-        id="seconds"
-        placeholder="Seconds">
-
-    </div>
-
-    <!-- BUTTONS -->
-    <div class="buttons">
-
-      <button
-        class="start"
-        onclick="startTimer()">
-
-        Start
-
-      </button>
-
-      <button
-        class="pause"
-        onclick="pauseTimer()">
-
-        Pause
-
-      </button>
-
-      <button
-        class="stop"
-        onclick="stopTimer()">
-
-        Stop Alarm
-
-      </button>
-
-      <button
-        class="reset"
-        onclick="resetTimer()">
-
-        Reset
-
-      </button>
-
-    </div>
-
+  <div class="session-label-wrap">
+    <label class="sr-only" for="sessionLabel">Session label</label>
+    <input type="text" id="sessionLabel" placeholder="Session label — e.g. Midterm Exam" maxlength="40">
   </div>
 
-  <!-- ======================
-       ALARM SOUND
-  ======================= -->
+  <div class="dial-wrap">
+    <svg viewBox="0 0 300 300">
+      <g class="rotor">
+        <circle class="track" cx="150" cy="150" r="120"></circle>
+        <circle class="progress" id="progressRing" cx="150" cy="150" r="120"></circle>
+      </g>
+      <circle class="inset-plate" cx="150" cy="150" r="92"></circle>
+      <g id="ticks"></g>
+    </svg>
+    <div class="timer-display" id="timer" aria-live="polite" aria-atomic="true">00:00</div>
+  </div>
 
-  <audio
-    id="alarmSound"
-    loop>
+  <div class="inputs">
+    <div class="field">
+      <label for="minutes">Minutes</label>
+      <input type="number" id="minutes" min="0" max="180" inputmode="numeric">
+    </div>
+    <div class="field">
+      <label for="seconds">Seconds</label>
+      <input type="number" id="seconds" min="0" max="59" inputmode="numeric">
+    </div>
+  </div>
 
-    <source
-      src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"
-      type="audio/ogg">
+  <div class="presets" id="presets">
+    <button class="chip" data-min="10">10m — Break</button>
+    <button class="chip" data-min="30">30m — Office Hrs</button>
+    <button class="chip" data-min="50">50m — Lecture</button>
+    <button class="chip" data-min="60">60m — Exam</button>
+    <button class="chip" data-min="90">90m — Seminar</button>
+  </div>
 
-  </audio>
+  <div class="buttons">
+    <button class="btn btn-start" id="startBtn" onclick="startTimer()">Start</button>
+    <button class="btn btn-pause" onclick="pauseTimer()">Pause</button>
+    <button class="btn btn-silence" id="silenceBtn" onclick="stopTimer()">Silence Bell</button>
+    <button class="btn btn-reset" onclick="resetTimer()">Reset session</button>
+  </div>
 
-  <script>
+  <p class="hint"><kbd>Space</kbd> start / pause &nbsp;·&nbsp; <kbd>R</kbd> reset</p>
+</div>
 
-    // =========================
-    // VARIABLES
-    // =========================
+<script>
+  // ============ STATE ============
+  let intervalId = null;
+  let totalTime = 0;
+  let remainingTime = 0;
+  let isRunning = false;
+  let isRinging = false;
+  let bellIntervalId = null;
+  let audioCtx = null;
 
-    let timer;
+  const timerEl = document.getElementById('timer');
+  const plaqueEl = document.getElementById('plaque');
+  const startBtn = document.getElementById('startBtn');
+  const silenceBtn = document.getElementById('silenceBtn');
+  const minutesEl = document.getElementById('minutes');
+  const secondsEl = document.getElementById('seconds');
+  const sessionLabelEl = document.getElementById('sessionLabel');
+  const progressRing = document.getElementById('progressRing');
 
-    let totalTime = 0;
+  const radius = 120;
+  const circumference = 2 * Math.PI * radius;
+  progressRing.style.strokeDasharray = circumference;
+  progressRing.style.strokeDashoffset = circumference; // starts empty
 
-    let remainingTime = 0;
+  const baseTitle = document.title;
 
-    let isRunning = false;
+  // ============ BUILD CLOCK TICKS (signature detail) ============
+  (function buildTicks(){
+    const g = document.getElementById('ticks');
+    const cx = 150, cy = 150;
+    for (let i = 0; i < 60; i++){
+      const angle = (i * 6) * (Math.PI / 180);
+      const isMajor = i % 5 === 0;
+      const rOuter = 140;
+      const rInner = isMajor ? 126 : 133;
+      const x1 = cx + rOuter * Math.sin(angle);
+      const y1 = cy - rOuter * Math.cos(angle);
+      const x2 = cx + rInner * Math.sin(angle);
+      const y2 = cy - rInner * Math.cos(angle);
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('class', 'tick' + (isMajor ? ' major' : ''));
+      g.appendChild(line);
+    }
+  })();
 
-    // Progress Circle
-    const circle =
-      document.querySelector(".progress");
+  // ============ HELPERS ============
+  function formatTime(t){
+    const m = Math.floor(t / 60);
+    const s = t % 60;
+    return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
 
-    const radius = 120;
+  function isUrgent(){
+    return totalTime > 0 && (remainingTime <= 10 || remainingTime / totalTime <= 0.1);
+  }
 
-    const circumference =
-      2 * Math.PI * radius;
+  function updateDisplay(){
+    timerEl.textContent = formatTime(remainingTime);
 
-    circle.style.strokeDasharray =
-      circumference;
+    const fraction = totalTime > 0 ? remainingTime / totalTime : 0;
+    progressRing.style.strokeDashoffset = circumference - fraction * circumference;
 
-    // =========================
-    // FORMAT TIME MM:SS
-    // =========================
+    const urgent = isUrgent();
+    plaqueEl.classList.toggle('urgent', urgent);
+    progressRing.classList.toggle('urgent', urgent);
+    timerEl.classList.toggle('urgent', urgent);
+    timerEl.classList.toggle('running', isRunning);
 
-    function formatTime(time){
+    const label = sessionLabelEl.value.trim();
+    document.title = totalTime > 0
+      ? `${formatTime(remainingTime)} · ${label || 'Faculty Timer'}`
+      : baseTitle;
+  }
 
-      let minutes =
-        Math.floor(time / 60);
+  // ============ BELL (Web Audio, no external file) ============
+  function ensureAudio(){
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
 
-      let seconds =
-        time % 60;
+  function chime(){
+    const ctx = ensureAudio();
+    const notes = [880, 660, 880];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const start = ctx.currentTime + i * 0.22;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.25, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.5);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.55);
+    });
+  }
 
-      return (
-        String(minutes).padStart(2,'0')
-        + ":" +
-        String(seconds).padStart(2,'0')
-      );
+  function ringBell(){
+    isRinging = true;
+    silenceBtn.classList.add('ringing');
+    chime();
+    bellIntervalId = setInterval(chime, 1600);
+  }
+
+  function silenceBell(){
+    isRinging = false;
+    silenceBtn.classList.remove('ringing');
+    clearInterval(bellIntervalId);
+  }
+
+  // ============ CORE TIMER ============
+  function startTimer(){
+    if (isRunning) return;
+    silenceBell();
+
+    if (remainingTime === 0){
+      const mins = parseInt(minutesEl.value, 10) || 0;
+      const secs = parseInt(secondsEl.value, 10) || 0;
+      totalTime = mins * 60 + secs;
+      remainingTime = totalTime;
     }
 
-    // =========================
-    // UPDATE DISPLAY
-    // =========================
-
-    function updateDisplay(){
-
-      document.getElementById("timer")
-        .innerText =
-        formatTime(remainingTime);
-
-      // Update progress
-      let progress =
-        circumference -
-        (remainingTime / totalTime)
-        * circumference;
-
-      circle.style.strokeDashoffset =
-        progress;
+    if (totalTime <= 0){
+      minutesEl.focus();
+      return;
     }
 
-    // =========================
-    // START TIMER
-    // =========================
+    isRunning = true;
+    startBtn.textContent = 'Resume';
+    updateDisplay();
 
-    function startTimer(){
-
-      // Prevent multiple timers
-      if(isRunning){
-        return;
+    intervalId = setInterval(() => {
+      if (remainingTime > 0){
+        remainingTime--;
+        updateDisplay();
+      } else {
+        clearInterval(intervalId);
+        isRunning = false;
+        updateDisplay();
+        ringBell();
       }
+    }, 1000);
+  }
 
-      // Get values
-      const mins =
-        parseInt(
-          document.getElementById("minutes")
-          .value
-        ) || 0;
+  function pauseTimer(){
+    clearInterval(intervalId);
+    isRunning = false;
+    startBtn.textContent = 'Resume';
+  }
 
-      const secs =
-        parseInt(
-          document.getElementById("seconds")
-          .value
-        ) || 0;
-
-      // First start
-      if(remainingTime === 0){
-
-        totalTime =
-          (mins * 60) + secs;
-
-        remainingTime =
-          totalTime;
-      }
-
-      // Validation
-      if(totalTime <= 0){
-
-        alert("Enter valid time");
-
-        return;
-      }
-
-      isRunning = true;
-
-      // Countdown Logic
-      timer = setInterval(() => {
-
-        if(remainingTime > 0){
-
-          remainingTime--;
-
-          updateDisplay();
-
-        } else {
-
-          clearInterval(timer);
-
-          isRunning = false;
-
-          // PLAY CONTINUOUS ALARM
-          const alarm =
-            document.getElementById("alarmSound");
-
-          alarm.play();
-        }
-
-      },1000);
+  function stopTimer(){
+    // "Silence Bell" — stops the chime without wiping the session
+    silenceBell();
+    if (remainingTime === 0 && !isRunning){
+      startBtn.textContent = 'Start';
     }
+  }
 
-    // =========================
-    // PAUSE TIMER
-    // =========================
+  function resetTimer(){
+    clearInterval(intervalId);
+    silenceBell();
+    isRunning = false;
+    totalTime = 0;
+    remainingTime = 0;
+    minutesEl.value = '';
+    secondsEl.value = '';
+    startBtn.textContent = 'Start';
+    progressRing.style.strokeDashoffset = circumference;
+    plaqueEl.classList.remove('urgent');
+    progressRing.classList.remove('urgent');
+    timerEl.classList.remove('urgent','running');
+    timerEl.textContent = '00:00';
+    document.title = baseTitle;
+  }
 
-    function pauseTimer(){
+  // ============ PRESETS ============
+  document.getElementById('presets').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    clearInterval(intervalId);
+    silenceBell();
+    isRunning = false;
+    const mins = parseInt(chip.dataset.min, 10);
+    minutesEl.value = mins;
+    secondsEl.value = 0;
+    totalTime = 0;
+    remainingTime = 0;
+    startTimer();
+  });
 
-      clearInterval(timer);
-
-      isRunning = false;
+  // ============ FULLSCREEN ============
+  document.getElementById('fsBtn').addEventListener('click', () => {
+    if (!document.fullscreenElement){
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
     }
+  });
 
-    // =========================
-    // STOP TIMER + STOP ALARM
-    // =========================
+  // ============ KEYBOARD SHORTCUTS ============
+  document.addEventListener('keydown', (e) => {
+    const typing = document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName);
+    if (typing) return;
 
-    function stopTimer(){
-
-      clearInterval(timer);
-
-      isRunning = false;
-
-      totalTime = 0;
-
-      remainingTime = 0;
-
-      // Reset display
-      document.getElementById("timer")
-        .innerText = "00:00";
-
-      // Reset progress
-      circle.style.strokeDashoffset = 0;
-
-      // STOP ALARM
-      const alarm =
-        document.getElementById("alarmSound");
-
-      alarm.pause();
-
-      alarm.currentTime = 0;
+    if (e.code === 'Space'){
+      e.preventDefault();
+      isRunning ? pauseTimer() : startTimer();
     }
-
-    // =========================
-    // RESET TIMER
-    // =========================
-
-    function resetTimer(){
-
-      clearInterval(timer);
-
-      isRunning = false;
-
-      totalTime = 0;
-
-      remainingTime = 0;
-
-      // Clear inputs
-      document.getElementById("minutes")
-        .value = "";
-
-      document.getElementById("seconds")
-        .value = "";
-
-      // Reset display
-      document.getElementById("timer")
-        .innerText = "00:00";
-
-      // Reset circle
-      circle.style.strokeDashoffset = 0;
-
-      // Stop alarm
-      const alarm =
-        document.getElementById("alarmSound");
-
-      alarm.pause();
-
-      alarm.currentTime = 0;
+    if (e.key.toLowerCase() === 'r'){
+      resetTimer();
     }
-
-  </script>
+  });
+</script>
 
 </body>
 </html>
